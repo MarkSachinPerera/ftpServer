@@ -8,8 +8,10 @@
 #include <netinet/in.h>
 #include <pthread.h>
 
+#define MAX_BUFFER_LEN 1024
 #define DIRPATH "./dataDir/"
 #define PORT 8080
+#define CONNECTION_STATUS "Connection Accepted"
 
 void * connection_handler(void * socketfd);
 
@@ -66,6 +68,16 @@ cleanup:
 }
 
 void * connection_handler(void * socketfd){
+
+    int sock = *(int *)socketfd;
+    char buffer[MAX_BUFFER_LEN];
+    int err;
+    char username[MAX_BUFFER_LEN];
+
+    // send welcome msg
+    send(sock, CONNECTION_STATUS, MAX_BUFFER_LEN, 0);
+
+    
 
 
     return(0);
