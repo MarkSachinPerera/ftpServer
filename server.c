@@ -12,6 +12,8 @@
 #define DIRPATH "./dataDir/"
 #define PORT 8080
 #define CONNECTION_STATUS "Connection Accepted"
+#define LIST "list"
+#define GET "GET"
 
 void * connection_handler(void * socketfd);
 
@@ -34,7 +36,7 @@ int main(int argc, char **argv)
     myaddr->sin_port = htons(PORT);
 
     
-    if (bind(socketfd, (struct sockaddr *) myaddr,sizeof(struct sockaddr_in) < 0)){
+    if (bind(socketfd, (struct sockaddr *) myaddr ,sizeof(struct sockaddr_in)) < 0){
         perror("bind failed\n");
         goto cleanup;
     }
@@ -69,15 +71,23 @@ cleanup:
 
 void * connection_handler(void * socketfd){
 
-    int sock = *(int *)socketfd;
+    int sockfd = *(int *)socketfd;
     char buffer[MAX_BUFFER_LEN];
-    int err;
-    char username[MAX_BUFFER_LEN];
+    char cmds[] = "$list - see the avaliable files\n$GET filename - get the file with filename\n";
+    // int err;
 
     // send welcome msg
-    send(sock, CONNECTION_STATUS, MAX_BUFFER_LEN, 0);
+    send(sockfd, CONNECTION_STATUS, MAX_BUFFER_LEN, 0);
+    memset(buffer,0,MAX_BUFFER_LEN);
+    strncpy(buffer, cmds, strlen(cmds));
+    send(sockfd, buffer, MAX_BUFFER_LEN, 0);
 
-    
+     while(( read(sockfd, buffer, MAX_BUFFER_LEN)) > 0){
+
+        if (strncmp(tolower(buffer),LIST,MAX_BUFFER_LEN) == 0){
+
+        }
+     }
 
 
     return(0);
