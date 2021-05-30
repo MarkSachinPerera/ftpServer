@@ -54,6 +54,6 @@ dkms.conf
 dataDir/
 
 *.o
-
+.vscode
 runserver
 runclient

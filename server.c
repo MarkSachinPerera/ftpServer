@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <ctype.h>
 
 #define MAX_BUFFER_LEN 1024
 #define DIRPATH "./dataDir/"
@@ -84,7 +85,17 @@ void * connection_handler(void * socketfd){
 
      while(( read(sockfd, buffer, MAX_BUFFER_LEN)) > 0){
 
-        if (strncmp(tolower(buffer),LIST,MAX_BUFFER_LEN) == 0){
+        int count = 0;
+        while(buffer[count] != '\0'){
+            buffer[count ] = tolower(buffer[count]);
+            count++;
+        }
+
+        if (strncmp(buffer,LIST,MAX_BUFFER_LEN) == 0){
+            // send a list of file names
+
+        } else if (strncmp(buffer, GET, MAX_BUFFER_LEN) == 0){
+            //send a file
 
         }
      }

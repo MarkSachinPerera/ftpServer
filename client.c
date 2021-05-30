@@ -42,7 +42,7 @@ int main(int argc, char ** argv){
         while(( readval = read(sockfd, buffer, MAX_BUFFER_LEN)) > 0){
             printf("%s\n>", buffer);
             memset(buffer,0,MAX_BUFFER_LEN); 
-            scanf(buffer);
+            scanf("%s",buffer);
             break;
         }
     }
