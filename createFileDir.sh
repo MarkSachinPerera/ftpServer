@@ -19,7 +19,9 @@
 # i think and due to that things arent working
 # solutions: dump files to cwd
 
+rm -r data-*
+
 for i in {1..10}
 do
-    echo "File $i content" > data.$i
+    echo "File $i content" > data-$i
 done
