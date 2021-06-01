@@ -1,3 +1,11 @@
+/**
+ * Author: Mark Perera
+ * File Name: client.c
+ * 
+ * This is the client end for the ftpserver.
+ * 
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,8 +17,8 @@
 #include <pthread.h>
 
 #define MAX_BUFFER_LEN 1024
-#define DIRPATH "./dataDir/"
-#define PORT 8080
+// #define DIRPATH "./dataDir/"
+#define PORT 7000
 #define CONNECTION_STATUS "Connection Accepted"
 
 int main(int argc, char ** argv){
@@ -43,7 +51,8 @@ int main(int argc, char ** argv){
             printf("%s\n>", buffer);
             memset(buffer,0,MAX_BUFFER_LEN); 
             scanf("%s",buffer);
-            break;
+
+            send(sockfd, buffer, MAX_BUFFER_LEN, 0);
         }
     }
 

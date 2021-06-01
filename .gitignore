@@ -51,9 +51,10 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-dataDir/
+data/
 
 *.o
 .vscode
 runserver
 runclient
+data.*
