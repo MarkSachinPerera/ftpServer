@@ -32,6 +32,7 @@
 #define ERROR_FINDFILES "Error: failed to find data files\n"
 #define ERROR_NOFILENAME "Error: GET failed to recieve filename\n"
 #define ERROR_READFILE "Error: GET failed to read file\n"
+#define INFO "info"
 
 void *connection_handler(void *socketfd);
 
@@ -236,7 +237,7 @@ void *connection_handler(void *socketfd)
 
     int sockfd = *(int *)socketfd;
     char buffer[MAX_BUFFER_LEN];
-    char cmds[] = "$list - see the avaliable files\n$GET - get the file with filename\n";
+    char cmds[] = "$info - display this message\n$list - see the avaliable files\n$GET - get the file with filename\n";
     // int err;
 
     // send welcome msg
@@ -299,6 +300,8 @@ void *connection_handler(void *socketfd)
             if (fileBuffer)
                 free(fileBuffer);
             fileBuffer = NULL;
+        } else if (strncmp(buffer, INFO, MAX_BUFFER_LEN) == 0){
+            send(sockfd, cmds, strlen(cmds)+1, 0);
         }
     }
 

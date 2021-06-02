@@ -23,6 +23,7 @@
 #define CONNECTION_STATUS "Connection Accepted"
 #define LIST "list"
 #define GET "get"
+#define INFO "info"
 
 int main(int argc, char **argv)
 {
@@ -100,6 +101,9 @@ int main(int argc, char **argv)
                  * Its extra work to get everything to happen in sync.
                  * 
                 */
+            } else if (0 == strncmp(buffer, INFO, strlen(buffer))){
+                send(sockfd, buffer, MAX_BUFFER_LEN, 0);
+
             }
             else
             {
