@@ -16,14 +16,7 @@
 #include <netinet/in.h>
 #include <pthread.h>
 #include <ctype.h>
-
-#define MAX_BUFFER_LEN 1024
-// #define DIRPATH "./dataDir/"
-#define PORT 7000
-#define CONNECTION_STATUS "Connection Accepted"
-#define LIST "list"
-#define GET "get"
-#define INFO "info"
+#include "../include/constants.h"
 
 int main(int argc, char **argv)
 {
@@ -31,7 +24,6 @@ int main(int argc, char **argv)
     struct sockaddr_in *address = malloc(sizeof(struct sockaddr_in));
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     char buffer[MAX_BUFFER_LEN];
-
 
     address->sin_addr.s_addr = INADDR_ANY;
     address->sin_family = AF_INET;
@@ -68,7 +60,6 @@ int main(int argc, char **argv)
             printf(">");
             scanf("%s", buffer);
 
-
             int count = 0;
             while (buffer[count] != '\0')
             {
@@ -88,7 +79,7 @@ int main(int argc, char **argv)
                 if (strlen(buffer) > 0)
                 {
 
-                    send(sockfd, GET, strlen(GET)+1, 0);
+                    send(sockfd, GET, strlen(GET) + 1, 0);
                     send(sockfd, buffer, MAX_BUFFER_LEN, 0);
                 }
                 else
@@ -101,10 +92,9 @@ int main(int argc, char **argv)
                  * Its extra work to get everything to happen in sync.
                  * 
                 */
-            } else if (0 == strncmp(buffer, INFO, strlen(buffer))){
-                send(sockfd, buffer, MAX_BUFFER_LEN, 0);
-
             }
+            else if (0 == strncmp(buffer, INFO, strlen(buffer)))
+                send(sockfd, buffer, MAX_BUFFER_LEN, 0);
             else
             {
                 printf("Error: invalid command\n");
