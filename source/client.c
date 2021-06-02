@@ -30,8 +30,7 @@ int main(int argc, char **argv)
     struct sockaddr_in *address = malloc(sizeof(struct sockaddr_in));
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     char buffer[MAX_BUFFER_LEN];
-    char *line = NULL;
-    size_t line_len = 0;
+
 
     address->sin_addr.s_addr = INADDR_ANY;
     address->sin_family = AF_INET;
@@ -68,8 +67,6 @@ int main(int argc, char **argv)
             printf(">");
             scanf("%s", buffer);
 
-            strncpy(buffer, line, line_len);
-            buffer[line_len] = '\0';
 
             int count = 0;
             while (buffer[count] != '\0')
@@ -83,13 +80,14 @@ int main(int argc, char **argv)
                 send(sockfd, buffer, MAX_BUFFER_LEN, 0);
             else if (0 == strncmp(buffer, GET, strlen(buffer)))
             {
-                scanf("\n$GET FileName>%s", buffer);
+                printf("\n$GET FileName>");
+                memset(buffer, 0, MAX_BUFFER_LEN);
+                scanf("%s", buffer);
 
                 if (strlen(buffer) > 0)
                 {
 
-                    send(sockfd, GET, strlen(GET), 0);
-                    sleep(1);
+                    send(sockfd, GET, strlen(GET)+1, 0);
                     send(sockfd, buffer, MAX_BUFFER_LEN, 0);
                 }
                 else

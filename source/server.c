@@ -31,6 +31,7 @@
 #define LEADNAME "data"
 #define ERROR_FINDFILES "Error: failed to find data files\n"
 #define ERROR_NOFILENAME "Error: GET failed to recieve filename\n"
+#define ERROR_READFILE "Error: GET failed to read file\n"
 
 void *connection_handler(void *socketfd);
 
@@ -99,7 +100,7 @@ DIR *get_file_descriptor(char *path)
         return (NULL);
     }
 
-    return(FD);
+    return (FD);
 }
 
 char *list_function(char *path)
@@ -114,7 +115,7 @@ char *list_function(char *path)
     ret = (char *)calloc(MAX_BUFFER_LEN, sizeof(char));
     temp = ret;
 
-    if ( (FD = get_file_descriptor(path)) == NULL)
+    if ((FD = get_file_descriptor(path)) == NULL)
         return (NULL);
 
     /**
@@ -138,6 +139,7 @@ char *list_function(char *path)
 
             if (output_file)
                 fclose(output_file);
+            output_file = NULL;
             return (NULL);
         }
 
@@ -148,7 +150,84 @@ char *list_function(char *path)
             int count = sprintf(temp, "%s\n", in_file->d_name);
             temp += count;
         }
+
+        if (entry_file)
+            fclose(entry_file);
+        entry_file = NULL;
     }
+    if (entry_file)
+        fclose(entry_file);
+    entry_file = NULL;
+    if (output_file)
+        fclose(output_file);
+    output_file = NULL;
+
+    return (ret);
+}
+
+char *get_file_content(char *path, char *filename)
+{
+    DIR *FD = NULL;
+    struct dirent *in_file = NULL;
+    FILE *output_file = NULL;
+    FILE *entry_file = NULL;
+    char *ret = NULL;
+    ret = (char *)calloc(MAX_BUFFER_LEN, sizeof(char));
+
+    char buffer[MAX_BUFFER_LEN];
+
+    if ((FD = get_file_descriptor(path)) == NULL)
+        return (NULL);
+
+    while ((in_file = readdir(FD)))
+    {
+
+        if (!strcmp(in_file->d_name, "."))
+            continue;
+        if (!strcmp(in_file->d_name, ".."))
+            continue;
+
+        entry_file = fopen(in_file->d_name, "r");
+
+        if (entry_file == NULL)
+        {
+            perror("error on opening entry file");
+
+            if (output_file)
+                fclose(output_file);
+            output_file = NULL;
+            return (NULL);
+        }
+
+        // printf("\n %s ", in_file->d_name);
+        if (strncmp(in_file->d_name, filename, strlen(filename)) == 0)
+        {
+            if (NULL == fgets(buffer, MAX_BUFFER_LEN, entry_file))
+            {
+                perror("error on opening entry file");
+                if (entry_file)
+                    fclose(entry_file);
+                entry_file = NULL;
+                if (output_file)
+                    fclose(output_file);
+                output_file = NULL;
+                return (NULL);
+            }
+
+            strncpy(ret, buffer, MAX_BUFFER_LEN);
+            break;
+        }
+        if (entry_file)
+            fclose(entry_file);
+        entry_file = NULL;
+    }
+    if (entry_file)
+        fclose(entry_file);
+    entry_file = NULL;
+    if (output_file)
+        fclose(output_file);
+    output_file = NULL;
+
     return (ret);
 }
 
@@ -157,7 +236,7 @@ void *connection_handler(void *socketfd)
 
     int sockfd = *(int *)socketfd;
     char buffer[MAX_BUFFER_LEN];
-    char cmds[] = "$list - see the avaliable files\n$GET filename - get the file with filename\n";
+    char cmds[] = "$list - see the avaliable files\n$GET - get the file with filename\n";
     // int err;
 
     // send welcome msg
@@ -184,7 +263,7 @@ void *connection_handler(void *socketfd)
             {
                 /*TODO: MORE ERROR HANDLING*/
                 listbuffer = calloc(MAX_BUFFER_LEN, sizeof(char));
-                strncpy(listbuffer, ERROR_FINDFILES, strlen(ERROR_FINDFILES));
+                strncpy(listbuffer, ERROR_FINDFILES, strlen(ERROR_FINDFILES) + 1);
             }
 
             send(sockfd, listbuffer, MAX_BUFFER_LEN, 0);
@@ -197,11 +276,29 @@ void *connection_handler(void *socketfd)
         {
             //send a file
 
+            printf("\nin get\n");
             if (read(sockfd, buffer, MAX_BUFFER_LEN) <= 0)
             {
-                send(sockfd, ERROR_NOFILENAME, strlen(ERROR_NOFILENAME), 0);
+                send(sockfd, ERROR_NOFILENAME, strlen(ERROR_NOFILENAME) + 1, 0);
                 continue;
             }
+
+            char path[MAX_BUFFER_LEN];
+            memset((char *)path, 0, MAX_BUFFER_LEN);
+            getcwd((char *)path, MAX_BUFFER_LEN);
+            char * fileBuffer = get_file_content(path, buffer);
+
+            if (fileBuffer == NULL)
+            {
+                fileBuffer = calloc(MAX_BUFFER_LEN, sizeof(char));
+                strncpy(fileBuffer, ERROR_READFILE, strlen(ERROR_READFILE) + 1);
+            }
+
+            send(sockfd, fileBuffer, MAX_BUFFER_LEN, 0);
+
+            if (fileBuffer)
+                free(fileBuffer);
+            fileBuffer = NULL;
         }
     }
 
