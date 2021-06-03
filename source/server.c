@@ -22,7 +22,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include "../include/constants.h"
-
+#include <stdbool.h>
 
 void *connection_handler(void *socketfd);
 
@@ -163,7 +163,6 @@ char *get_file_content(char *path, char *filename)
     FILE *output_file = NULL;
     FILE *entry_file = NULL;
     char *ret = NULL;
-    
 
     char buffer[MAX_BUFFER_LEN];
 
@@ -223,13 +222,63 @@ char *get_file_content(char *path, char *filename)
     return (ret);
 }
 
+bool write_to_file(char *path, char *filename, char *text)
+{
+    DIR *FD = NULL;
+    struct dirent *in_file = NULL;
+    FILE *output_file = NULL;
+    FILE *entry_file = NULL;
+    char *ret = NULL;
+
+    if ((FD = get_file_descriptor(path)) == NULL)
+        return (NULL);
+
+        while ((in_file = readdir(FD)))
+    {
+
+        if (!strcmp(in_file->d_name, "."))
+            continue;
+        if (!strcmp(in_file->d_name, ".."))
+            continue;
+
+        entry_file = fopen(in_file->d_name, "r");
+
+        if (entry_file == NULL)
+        {
+            perror("error on opening entry file");
+
+            if (output_file)
+                fclose(output_file);
+            output_file = NULL;
+            return (NULL);
+        }
+
+        // printf("\n %s ", in_file->d_name);
+        if (strncmp(in_file->d_name, LEADNAME, strlen(LEADNAME)) == 0)
+        {
+
+
+        }
+
+        if (entry_file)
+            fclose(entry_file);
+        entry_file = NULL;
+    }
+    if (entry_file)
+        fclose(entry_file);
+    entry_file = NULL;
+    if (output_file)
+        fclose(output_file);
+    output_file = NULL;
+}
+
 void *connection_handler(void *socketfd)
 {
 
     int sockfd = *(int *)socketfd;
     char buffer[MAX_BUFFER_LEN];
     char cmds[] = "$info - display this message\n$list - see the avaliable files\n$GET - get the file with filename\n"
-    "$* - to cancel current command\n";
+                  "$* - to cancel current command\n$ADD - add to a file or create a new file and write to it";
     // int err;
 
     // send welcome msg
@@ -269,34 +318,56 @@ void *connection_handler(void *socketfd)
         {
             //send a file
 
-            printf("\nin get\n");
-            memset(buffer,0,MAX_BUFFER_LEN);
+            // printf("\nin get\n");
+            memset(buffer, 0, MAX_BUFFER_LEN);
             if (read(sockfd, buffer, MAX_BUFFER_LEN) <= 0)
             {
                 send(sockfd, ERROR_NOFILENAME, strlen(ERROR_NOFILENAME) + 1, 0);
                 continue;
             }
 
+            /**Get Path variable after reading in the filename */
             char path[MAX_BUFFER_LEN];
             memset((char *)path, 0, MAX_BUFFER_LEN);
             getcwd((char *)path, MAX_BUFFER_LEN);
-            char * fileBuffer = get_file_content(path, buffer);
 
+            /** 
+             * attempt to read in the file with filename
+             * send back either the data or an error message
+             */
+            char *fileBuffer = get_file_content(path, buffer);
             if (fileBuffer == NULL)
             {
                 fileBuffer = calloc(MAX_BUFFER_LEN, sizeof(char));
                 strncpy(fileBuffer, ERROR_READFILE, strlen(ERROR_READFILE) + 1);
             }
-
             send(sockfd, fileBuffer, MAX_BUFFER_LEN, 0);
 
             if (fileBuffer)
                 free(fileBuffer);
             fileBuffer = NULL;
-        } else if (strncmp(buffer, INFO, MAX_BUFFER_LEN) == 0){
-            send(sockfd, cmds, strlen(cmds)+1, 0);
-        } else if (strncmp(buffer, ADD, MAX_BUFFER_LEN) == 0){
+        }
+        else if (strncmp(buffer, INFO, MAX_BUFFER_LEN) == 0)
+        {
+            send(sockfd, cmds, strlen(cmds) + 1, 0);
+        }
+        else if (strncmp(buffer, ADD, MAX_BUFFER_LEN) == 0)
+        {
+            printf("\nin add\n");
 
+            char filename_buffer[MAX_BUFFER_LEN];
+            if (read(sockfd, filename_buffer, MAX_BUFFER_LEN) <= 0)
+            {
+                send(sockfd, ERROR_NOFILENAME, strlen(ERROR_NOFILENAME) + 1, 0);
+                continue;
+            }
+
+            char text_buffer[MAX_BUFFER_LEN];
+            if (read(sockfd, text_buffer, MAX_BUFFER_LEN) <= 0)
+            {
+                send(sockfd, ERROR_NOTEXT, strlen(ERROR_NOTEXT) + 1, 0);
+                continue;
+            }
         }
     }
 

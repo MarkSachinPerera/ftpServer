@@ -7,15 +7,16 @@
  */
 
 #define MAX_BUFFER_LEN 1024
-// #define DIRPATH "/home/ghsot/workspace/data"
+// #define DIRPATH "/data"
 #define PORT 7000
 #define CONNECTION_STATUS "Connection Accepted"
 #define LIST "list"
 #define GET "get"
 #define LEADNAME "data"
 #define ERROR_FINDFILES "Error: failed to find data files\n"
-#define ERROR_NOFILENAME "Error: GET failed to recieve filename\n"
-#define ERROR_READFILE "Error: GET failed to read file\n"
+#define ERROR_NOFILENAME "Error: failed to recieve filename\n"
+#define ERROR_READFILE "Error: failed to read file\n"
+#define ERROR_NOTEXT "Error: failed to get the user text\n"
 #define INFO "info"
 #define ADD "add"
 #define KILL "*"

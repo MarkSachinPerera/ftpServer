@@ -84,7 +84,7 @@ int main(int argc, char **argv)
                 {
 
                     send(sockfd, GET, strlen(GET) + 1, 0);
-                    sleep(1);
+                    usleep(10);
                     send(sockfd, buffer, MAX_BUFFER_LEN, 0);
                 }
                 else
@@ -118,10 +118,10 @@ int main(int argc, char **argv)
                 if (0 == strncmp(filename_buffer, KILL, strlen(filename_buffer)))
                     goto RETRY;
 
-                continue;
-
+                send(sockfd, ADD, strlen(ADD)+1,0);
+                usleep(10);
                 send(sockfd, filename_buffer, MAX_BUFFER_LEN, 0);
-                sleep(1);
+                usleep(10);
                 send(sockfd, text_buffer, MAX_BUFFER_LEN, 0);
 
             }
