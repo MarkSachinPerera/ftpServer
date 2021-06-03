@@ -57,6 +57,7 @@ int main(int argc, char **argv)
 
         //User input and lowercase it
         RETRY:
+            memset(buffer, 0, MAX_BUFFER_LEN);
             printf(">");
             scanf("%s", buffer);
 
@@ -76,10 +77,14 @@ int main(int argc, char **argv)
                 memset(buffer, 0, MAX_BUFFER_LEN);
                 scanf("%s", buffer);
 
+                if (0 == strncmp(buffer, KILL, strlen(buffer)))
+                    goto RETRY;
+
                 if (strlen(buffer) > 0)
                 {
 
                     send(sockfd, GET, strlen(GET) + 1, 0);
+                    sleep(1);
                     send(sockfd, buffer, MAX_BUFFER_LEN, 0);
                 }
                 else
@@ -95,6 +100,33 @@ int main(int argc, char **argv)
             }
             else if (0 == strncmp(buffer, INFO, strlen(buffer)))
                 send(sockfd, buffer, MAX_BUFFER_LEN, 0);
+            else if (0 == strncmp(buffer, ADD, strlen(buffer)))
+            {
+
+                char filename_buffer[MAX_BUFFER_LEN];
+                char text_buffer[MAX_BUFFER_LEN];
+
+                printf("\n$ADD FileName>");
+                scanf("%s", filename_buffer);
+
+                if (0 == strncmp(filename_buffer, KILL, strlen(filename_buffer)))
+                    goto RETRY;
+
+                printf("\n$ADD %s text>", filename_buffer);
+                scanf("%s", text_buffer);
+
+                if (0 == strncmp(filename_buffer, KILL, strlen(filename_buffer)))
+                    goto RETRY;
+
+                continue;
+
+                send(sockfd, filename_buffer, MAX_BUFFER_LEN, 0);
+                sleep(1);
+                send(sockfd, text_buffer, MAX_BUFFER_LEN, 0);
+
+            }
+            else if (0 == strncmp(buffer, KILL, strlen(buffer)))
+                goto RETRY;
             else
             {
                 printf("Error: invalid command\n");

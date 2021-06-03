@@ -163,7 +163,7 @@ char *get_file_content(char *path, char *filename)
     FILE *output_file = NULL;
     FILE *entry_file = NULL;
     char *ret = NULL;
-    ret = (char *)calloc(MAX_BUFFER_LEN, sizeof(char));
+    
 
     char buffer[MAX_BUFFER_LEN];
 
@@ -190,9 +190,10 @@ char *get_file_content(char *path, char *filename)
             return (NULL);
         }
 
-        // printf("\n %s ", in_file->d_name);
+        // printf("\nddddd%s", filename);
         if (strncmp(in_file->d_name, filename, strlen(filename)) == 0)
         {
+            // printf("\nherer%s", in_file->d_name);
             if (NULL == fgets(buffer, MAX_BUFFER_LEN, entry_file))
             {
                 perror("error on opening entry file");
@@ -204,7 +205,7 @@ char *get_file_content(char *path, char *filename)
                 output_file = NULL;
                 return (NULL);
             }
-
+            ret = (char *)calloc(MAX_BUFFER_LEN, sizeof(char));
             strncpy(ret, buffer, MAX_BUFFER_LEN);
             break;
         }
@@ -227,7 +228,8 @@ void *connection_handler(void *socketfd)
 
     int sockfd = *(int *)socketfd;
     char buffer[MAX_BUFFER_LEN];
-    char cmds[] = "$info - display this message\n$list - see the avaliable files\n$GET - get the file with filename\n";
+    char cmds[] = "$info - display this message\n$list - see the avaliable files\n$GET - get the file with filename\n"
+    "$* - to cancel current command\n";
     // int err;
 
     // send welcome msg
@@ -242,7 +244,7 @@ void *connection_handler(void *socketfd)
         if (strncmp(buffer, LIST, MAX_BUFFER_LEN) == 0)
         {
 
-            printf("\nin list\n");
+            // printf("\nin list\n");
 
             // send a list of file names
             char path[MAX_BUFFER_LEN];
@@ -268,6 +270,7 @@ void *connection_handler(void *socketfd)
             //send a file
 
             printf("\nin get\n");
+            memset(buffer,0,MAX_BUFFER_LEN);
             if (read(sockfd, buffer, MAX_BUFFER_LEN) <= 0)
             {
                 send(sockfd, ERROR_NOFILENAME, strlen(ERROR_NOFILENAME) + 1, 0);
@@ -292,6 +295,8 @@ void *connection_handler(void *socketfd)
             fileBuffer = NULL;
         } else if (strncmp(buffer, INFO, MAX_BUFFER_LEN) == 0){
             send(sockfd, cmds, strlen(cmds)+1, 0);
+        } else if (strncmp(buffer, ADD, MAX_BUFFER_LEN) == 0){
+
         }
     }
 

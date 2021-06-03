@@ -18,3 +18,4 @@
 #define ERROR_READFILE "Error: GET failed to read file\n"
 #define INFO "info"
 #define ADD "add"
+#define KILL "*"
